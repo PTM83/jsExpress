@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Música</title>
+    <link rel="stylesheet" href="./index.css">
+    <!-- <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style> -->
+</head>
+<body>
+    <section class="firstContainer">
+        <h1>Primer desafío</h1>
+        <form class="addInfo" action="">
+            <input class = "name" type = "text" placeholder = "Ingresar una canción">
+            <input class = "band" type = "text" placeholder = "Ingresar nombre de banda">
+            <input class = "year" type = "text" placeholder = "Ingresar el año">
+            <button class = "add-btn" type="button">Agregar</button>    
+        </form>
+    </section>
+
+    <h2>Playlist song</h2>
+    <section class="list-container">
+        
+    </section>
+   
+    <script>
+        // Capturar cada una de las entradas de los inputs
+        const groupName = document.querySelector(".name")
+        const groupBand = document.querySelector(".band")
+        const groupYear = document.querySelector(".year")
+        const addButton = document.querySelector(".add-btn")
+        // const deleteButton = document.querySelector(".delete-btn")
+        const listContainer = document.querySelector(".list-container")
+
+        // Funciones
+        const deleteSong = async (id) => {
+            
+            const response = await fetch(`/${id}`,{
+                method: "DELETE",
+                headers:{
+                    "Content-Type": "application/json"
+                }
+            })
+
+            if (response.ok) {
+                getSongs()
+            }            
+        }
+        
+        // fetch de las canciones
+        const getSongs = async () => {
+            try {
+                const response = await fetch("/canciones")
+                const data = await response.json()
+                
+                let dataSong = ""
+
+                if (data.length === 0) {
+                    dataSong = `
+                    <p>
+                        No hay canciones por mostrar, favor ingresar
+                        nombre de la canción, el artista y el año de creación
+                        de la canción. 
+                    </p>`
+                    
+                } else {
+                    dataSong += 
+                        `
+                        <table>
+                            <thead>
+                                <th>Artist name</th>
+                                <th>Name of the Song</th>
+                                <th>Year of the Song</th>
+                                <th>Erase button</th>
+                            </thead>
+                            <tbody>
+                        `
+                    data.forEach(element => {
+                        const {id, name, band, year} = element
+                        dataSong += 
+                       `
+                            <tr>
+                                <td>${band}</td>
+                                <td>${name}</td>
+                                <td>${year}</td>
+                                <td>
+                                    <button class="delete-btn" onclick = "deleteSong('${id}')">Eliminar</button>
+                                </td>
+                            </tr>
+                        `
+                    });
+                    dataSong += 
+                    `
+                            </tbody>
+                        </table>
+                    `
+                    
+                }
+                
+                listContainer.innerHTML = dataSong
+                groupName.value = ''
+                groupBand.value = ''
+                groupYear.value = ''
+
+            } catch (error) {
+                console.error(`Ha ocurrido un error ${error}`)
+            }
+        }
+        getSongs()
+
+        const handlePostSong = async () => {
+            const res = await fetch("/canciones")
+            const data = await res.json()
+
+            if (data.length === 0) {
+                const newSong = {
+                    id:1,
+                    name: groupName.value,
+                    band: groupBand.value,
+                    year: groupYear.value
+                }
+            }
+            
+            try {
+                    const newSong = {
+                        id:data.length + 1,
+                        name: groupName.value,
+                        band: groupBand.value,
+                        year: groupYear.value
+                    }
+                // Este sería el body la variable newSong
+                // console.log(newSong)
+                const response = await fetch('/canciones', {
+                    method:"POST",
+                    body: JSON.stringify(newSong),
+                    headers: {
+                        "Content-Type":"application/json"
+                    }
+                })
+                
+                if (response.ok) {
+                        getSongs()
+                    }
+                } catch (error) {
+                    console.error(error)
+                }
+        }
+
+        addButton.addEventListener("click", () => handlePostSong())
+
+    </script>
+</body>
+
+</html>
