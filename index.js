@@ -66,3 +66,20 @@ app.delete('/:id', (req, res) => {
     // Enviar de vuelta al Front la nueva lista
     // res.json(canciones)
 })
+
+// PUT 
+app.put('/:id', (req, res) => {
+    // Obtener el párametro
+    const {id} = req.params
+    const song = req.body
+
+    const canciones = JSON.parse(readFileSync('canciones.json', 'utf-8'))
+    // Encuentra la posición del elemento a eliminar
+    const index = canciones.findIndex( (cancion)=> cancion.id === id)
+    // Se modifica el value del id seleccionado
+    canciones[index] = song
+    // Sobre escribir el archivo
+    writeFileSync('canciones.json', JSON.stringify(canciones))
+    // Backend message 
+    res.json({message: 'Canción modificada con éxito'})
+})

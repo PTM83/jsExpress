@@ -5,20 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Música</title>
     <link rel="stylesheet" href="./index.css">
-    <!-- <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style> -->
+    
 </head>
 <body>
     <section class="firstContainer">
@@ -45,30 +32,39 @@
         // const deleteButton = document.querySelector(".delete-btn")
         const listContainer = document.querySelector(".list-container")
 
-        // Funciones
-        const deleteSong = async (id) => {
-            
-            const response = await fetch(`/${id}`,{
-                method: "DELETE",
-                headers:{
-                    "Content-Type": "application/json"
-                }
-            })
+        // FETCH las canciones
 
-            if (response.ok) {
-                getSongs()
-            }            
+        const fetchCanciones = async () => {
+            
+            let data;
+
+            try {
+                const response = await fetch("/canciones")
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}` )
+                }
+                data = await response.json()
+            } catch (error) {
+                console.error(error)
+                return null
+            }
+
+            return data
         }
-        
+
+        // GET PROCESS
         // fetch de las canciones
         const getSongs = async () => {
             try {
-                const response = await fetch("/canciones")
-                const data = await response.json()
+                // const response = await fetch("/canciones")
+                // const data = await response.json()
                 
+                const data = await fetchCanciones()
+
                 let dataSong = ""
 
-                if (data.length === 0) {
+                if (!data || data.length === 0) {
                     dataSong = `
                     <p>
                         No hay canciones por mostrar, favor ingresar
@@ -84,7 +80,7 @@
                                 <th>Artist name</th>
                                 <th>Name of the Song</th>
                                 <th>Year of the Song</th>
-                                <th>Erase button</th>
+                                <th>Erase - Edit buttons</th>
                             </thead>
                             <tbody>
                         `
@@ -97,8 +93,9 @@
                                 <td>${name}</td>
                                 <td>${year}</td>
                                 <td>
+                                    <button class="edit-btn" onclick = "editSong('${id}')">Editar</button>
                                     <button class="delete-btn" onclick = "deleteSong('${id}')">Eliminar</button>
-                                </td>
+                                    </td>
                             </tr>
                         `
                     });
@@ -121,11 +118,14 @@
         }
         getSongs()
 
+        // POST PROCESS
         const handlePostSong = async () => {
-            const res = await fetch("/canciones")
-            const data = await res.json()
+            // const res = await fetch("/canciones")
+            // const data = await res.json()
 
-            if (data.length === 0) {
+            const data = await fetchCanciones()
+
+            if (!data || data.length === 0) {
                 const newSong = {
                     id:1,
                     name: groupName.value,
@@ -157,6 +157,69 @@
                 } catch (error) {
                     console.error(error)
                 }
+        }
+        
+        // Función para encontrar canción por su ID
+        const findSongById = (datos, id) => {
+            return datos.find(song => song.id === id)
+        } 
+
+        // PUT PROCESS
+        const editSong = async (id) => {
+
+            const data = await fetchCanciones()
+            const numId = Number(id)
+
+            const findObject = findSongById(data, numId)
+
+            if (!findObject) {
+                console.log('Song not found!')
+                return
+            }
+
+            groupName.value = findObject.name
+            groupBand.value = findObject.band
+            groupYear.value = findObject.year
+
+            const updateSong = {
+                id: numId,
+                name: groupName.value,
+                band: groupBand.value,
+                year: groupYear.value
+            }
+
+            try {
+                const response = await fetch(`/${id}`, {
+                    method:"PUT",
+                    body: JSON.stringify(updateSong),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+    
+                if (response.ok) {
+                    getSongs()
+                }
+                
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        // DELETE PROCESS
+        const deleteSong = async (id) => {
+            
+            
+            const response = await fetch(`/${id}`,{
+                method: "DELETE",
+                headers:{
+                    "Content-Type": "application/json"
+                }
+            })
+
+            if (response.ok) {
+                getSongs()
+            }            
         }
 
         addButton.addEventListener("click", () => handlePostSong())
