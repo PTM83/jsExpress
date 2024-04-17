@@ -14,7 +14,8 @@
             <input class = "name" type = "text" placeholder = "Ingresar una canción">
             <input class = "band" type = "text" placeholder = "Ingresar nombre de banda">
             <input class = "year" type = "text" placeholder = "Ingresar el año">
-            <button class = "add-btn" type="button">Agregar</button>    
+            <button class = "add-btn" type="button">Agregar</button>
+            <button class = "editBtn" type="button">Click Editar</button>
         </form>
     </section>
 
@@ -24,13 +25,35 @@
     </section>
    
     <script>
+
         // Capturar cada una de las entradas de los inputs
         const groupName = document.querySelector(".name")
         const groupBand = document.querySelector(".band")
         const groupYear = document.querySelector(".year")
-        const addButton = document.querySelector(".add-btn")
-        // const deleteButton = document.querySelector(".delete-btn")
         const listContainer = document.querySelector(".list-container")
+        // Buttons
+        const addButton = document.querySelector(".add-btn")
+        const editButtons = document.querySelectorAll(".edit-btn")
+        const clickHereButton = document.querySelector(".editBtn")
+        const deleteButton = document.querySelector(".delete-btn")
+
+        // Esconder el botón editar
+        clickHereButton.style.display = 'none'
+        
+        // INDEPENDENT FUNCTIONS
+
+        // Función para encontrar canción por su ID
+        const findSongById = (datos, id) => {
+            return datos.find(song => song.id === id)
+        }
+        // Función para encontrar canción por name, band, year
+        function findSongID(songs, name, band, year) {
+            const song = songs.find( song => 
+            song.name === name && song.band === band && song.year === year
+            )
+
+            return song ? song.id : null
+        }
 
         // FETCH las canciones
 
@@ -93,7 +116,7 @@
                                 <td>${name}</td>
                                 <td>${year}</td>
                                 <td>
-                                    <button class="edit-btn" onclick = "editSong('${id}')">Editar</button>
+                                    <button class="edit-btn" onclick = "showSong('${id}')">Editar</button>
                                     <button class="delete-btn" onclick = "deleteSong('${id}')">Eliminar</button>
                                     </td>
                             </tr>
@@ -136,7 +159,7 @@
             
             try {
                     const newSong = {
-                        id:data.length + 1,
+                        id: data.length + 1,
                         name: groupName.value,
                         band: groupBand.value,
                         year: groupYear.value
@@ -159,13 +182,12 @@
                 }
         }
         
-        // Función para encontrar canción por su ID
-        const findSongById = (datos, id) => {
-            return datos.find(song => song.id === id)
-        } 
 
         // PUT PROCESS
-        const editSong = async (id) => {
+        const showSong = async (id) => {
+
+            addButton.style.display = 'none';
+            clickHereButton.style.display = 'inline';
 
             const data = await fetchCanciones()
             const numId = Number(id)
@@ -176,39 +198,86 @@
                 console.log('Song not found!')
                 return
             }
-
+            
             groupName.value = findObject.name
             groupBand.value = findObject.band
             groupYear.value = findObject.year
 
-            const updateSong = {
-                id: numId,
-                name: groupName.value,
-                band: groupBand.value,
-                year: groupYear.value
-            }
-
-            try {
-                const response = await fetch(`/${id}`, {
-                    method:"PUT",
-                    body: JSON.stringify(updateSong),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-    
-                if (response.ok) {
-                    getSongs()
-                }
+            clickHereButton.onclick = async () => {
                 
-            } catch (error) {
-                console.error(error)
+                const updateSong = {
+                    id: numId,
+                    name: groupName.value,
+                    band: groupBand.value,
+                    year: groupYear.value
+                }
+                console.log(updateSong)
+                try {
+                    const response = await fetch(`/${id}`, {
+                        method:"PUT",
+                        body: JSON.stringify(updateSong),
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+        
+                    if (response.ok) {
+                        getSongs()
+                    }
+                    
+                } catch (error) {
+                    console.error(error)
+                }
+            addButton.style.display = 'inline';
+            clickHereButton.style.display = 'none';
+
             }
         }
 
+
+        // const editSendSong = async () => {
+            
+        //     const data = await fetchCanciones()
+
+        //     const name = groupName.value
+        //     const band = groupBand.value
+        //     const year = groupYear.value
+            
+        //     numId = findSongID(data, name, band,year)
+
+        //     const updateSong = {
+        //             id: numId,
+        //             name: groupName.value,
+        //             band: groupBand.value,
+        //             year: groupYear.value
+        //         }
+        //     console.log(updateSong)
+    
+        //     try {
+        //         const response = await fetch(`/${numId}`, {
+        //             method:"PUT",
+        //             body: JSON.stringify(updateSong),
+        //             headers: {
+        //                 "Content-Type": "application/json"
+        //             }
+        //         })
+    
+        //         if (response.ok) {
+        //             getSongs()
+        //         }
+                
+        //     } catch (error) {
+        //         console.error(error)
+        //     }
+
+        //     addButton.style.display = 'inline';
+        //     clickHereButton.style.display = 'none';
+        // } 
+
+        // clickHereButton.addEventListener('click')
+
         // DELETE PROCESS
         const deleteSong = async (id) => {
-            
             
             const response = await fetch(`/${id}`,{
                 method: "DELETE",
@@ -223,6 +292,9 @@
         }
 
         addButton.addEventListener("click", () => handlePostSong())
+        // clickHereButton.addEventListener("click", () => editSendSong())
+        
+
 
     </script>
 </body>

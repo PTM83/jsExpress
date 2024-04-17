@@ -73,13 +73,21 @@ app.put('/:id', (req, res) => {
     const {id} = req.params
     const song = req.body
 
-    const canciones = JSON.parse(readFileSync('canciones.json', 'utf-8'))
+    let canciones = JSON.parse(readFileSync('canciones.json', 'utf-8'))
     // Encuentra la posición del elemento a eliminar
-    const index = canciones.findIndex( (cancion)=> cancion.id === id)
+    const index = canciones.findIndex( (cancion) => cancion.id === Number(id))
+    
+    if (index === -1) {
+        return res.status(404).json({message: 'Canción no encontrada'})
+    }
+    
     // Se modifica el value del id seleccionado
     canciones[index] = song
+
+    res.json(song)
+
     // Sobre escribir el archivo
     writeFileSync('canciones.json', JSON.stringify(canciones))
     // Backend message 
-    res.json({message: 'Canción modificada con éxito'})
+    res.json({message: 'Canción modificada con éxito', song: song})
 })
