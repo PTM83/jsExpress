@@ -211,7 +211,7 @@
                     band: groupBand.value,
                     year: groupYear.value
                 }
-                console.log(updateSong)
+                // console.log(updateSong)
                 try {
                     const response = await fetch(`/${id}`, {
                         method:"PUT",
@@ -234,48 +234,6 @@
             }
         }
 
-
-        // const editSendSong = async () => {
-            
-        //     const data = await fetchCanciones()
-
-        //     const name = groupName.value
-        //     const band = groupBand.value
-        //     const year = groupYear.value
-            
-        //     numId = findSongID(data, name, band,year)
-
-        //     const updateSong = {
-        //             id: numId,
-        //             name: groupName.value,
-        //             band: groupBand.value,
-        //             year: groupYear.value
-        //         }
-        //     console.log(updateSong)
-    
-        //     try {
-        //         const response = await fetch(`/${numId}`, {
-        //             method:"PUT",
-        //             body: JSON.stringify(updateSong),
-        //             headers: {
-        //                 "Content-Type": "application/json"
-        //             }
-        //         })
-    
-        //         if (response.ok) {
-        //             getSongs()
-        //         }
-                
-        //     } catch (error) {
-        //         console.error(error)
-        //     }
-
-        //     addButton.style.display = 'inline';
-        //     clickHereButton.style.display = 'none';
-        // } 
-
-        // clickHereButton.addEventListener('click')
-
         // DELETE PROCESS
         const deleteSong = async (id) => {
             
@@ -292,9 +250,6 @@
         }
 
         addButton.addEventListener("click", () => handlePostSong())
-        // clickHereButton.addEventListener("click", () => editSendSong())
-        
-
 
     </script>
 </body>
